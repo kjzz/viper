@@ -1632,3 +1632,13 @@ func BenchmarkGetBoolFromMap(b *testing.B) {
 		}
 	}
 }
+
+func TestConfigFileUsed(t *testing.T) {
+	v := New()
+	v.SetConfigFile("test/test.toml")
+	err := v.ReadInConfig()
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(v.GetInt("type"))
+}
