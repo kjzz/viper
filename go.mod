@@ -1,4 +1,4 @@
-module github.com/spf13/viper
+module github.com/kjzz/viper
 
 require (
 	github.com/armon/consul-api v0.0.0-20180202201655-eb2c6b5be1b6 // indirect
@@ -7,6 +7,7 @@ require (
 	github.com/coreos/go-semver v0.2.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/hashicorp/hcl v1.0.0
+	github.com/kjzz/go-toml v1.2.1
 	github.com/magiconair/properties v1.8.0
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/pelletier/go-toml v1.2.0
