@@ -1245,6 +1245,74 @@ func (v *Viper) ReadInConfig() error {
 	return nil
 }
 
+func WriteConfigBuffer() ([]byte, error) { return v.WriteConfigBuffer() }
+func (v *Viper) WriteConfigBuffer() ([]byte, error) {
+	jww.INFO.Println("Attempting to write configuration to buffer.")
+	configType := v.getConfigType()
+	if !stringInSlice(configType, SupportedExts) {
+		return nil, UnsupportedConfigError(configType)
+	}
+	if v.config == nil {
+		v.config = make(map[string]interface{})
+	}
+	return v.marshalBuffer(configType)
+}
+
+func (v *Viper) marshalBuffer(configType string) ([]byte, error) {
+	c := v.AllSettings()
+	switch configType {
+	case "json":
+		b, err := json.MarshalIndent(c, "", "  ")
+		if err != nil {
+			return nil, ConfigMarshalError{err}
+		}
+		return b, nil
+
+	case "hcl":
+		b, err := json.Marshal(c)
+		if err != nil {
+			return nil, ConfigMarshalError{err}
+		}
+		return printer.Format(b)
+
+	case "prop", "props", "properties":
+		if v.properties == nil {
+			v.properties = properties.NewProperties()
+		}
+		p := v.properties
+		for _, key := range v.AllKeys() {
+			_, _, err := p.Set(key, v.GetString(key))
+			if err != nil {
+				return nil, ConfigMarshalError{err}
+			}
+		}
+		b := bytes.NewBuffer(make([]byte, 0))
+		bw := bufio.NewWriter(b)
+		_, err := p.WriteComment(bw, "#", properties.UTF8)
+		if err != nil {
+			return nil, ConfigMarshalError{err}
+		}
+		bw.Flush()
+		return b.Bytes(), nil
+
+	case "toml":
+		t, err := toml.TreeFromMap(c)
+		if err != nil {
+			return nil, ConfigMarshalError{err}
+		}
+		return []byte(t.String()), nil
+
+	case "yaml", "yml":
+		b, err := yaml.Marshal(c)
+		if err != nil {
+			return nil, ConfigMarshalError{err}
+		}
+		return b, nil
+	}
+	return nil, ConfigMarshalError{err: errors.New("Unsupport Config Type!")}
+}
+
+
 // MergeInConfig merges a new configuration with an existing config.
 func MergeInConfig() error { return v.MergeInConfig() }
 func (v *Viper) MergeInConfig() error {
