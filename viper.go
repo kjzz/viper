@@ -45,6 +45,8 @@ import (
 	"github.com/spf13/cast"
 	jww "github.com/spf13/jwalterweatherman"
 	"github.com/spf13/pflag"
+	"github.com/pkg/errors"
+	"bufio"
 )
 
 // ConfigMarshalError happens when failing to marshal the configuration.
